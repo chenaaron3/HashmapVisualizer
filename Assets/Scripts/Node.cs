@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class Node : Operator
 {
+    public LineRenderer lr;
     public Rigidbody2D rb;
     public GameObject hashtag;
     public Text valueText;
@@ -12,9 +13,12 @@ public class Node : Operator
     string value;
     int hash;
 
+    Animator anim;
+
     private void Start()
     {
-        SetDirection(transform.right);
+        anim = GetComponent<Animator>();
+        anim.speed = TickManager.tickSpeed;
     }
 
     public override void OnTick()
@@ -57,7 +61,7 @@ public class Node : Operator
     // set the hash value
     public void SetHash(int val)
     {
-        hashtag.SetActive(true);
+        anim.SetTrigger("tagin");
         hash = val;
         hashText.text = val + "";
     }
@@ -71,6 +75,42 @@ public class Node : Operator
     // disables the hashtag
     public void HideHashtag()
     {
-        hashtag.SetActive(false);
+        anim.ResetTrigger("tagin");
+        anim.SetTrigger("tagout");
+    }
+
+    // move to destination within a tick
+    public void Teleport(GameObject destination)
+    {
+        float time = 1 / TickManager.tickSpeed * .9f;
+        // stop movement
+        SetDirection(Vector2.zero);
+        // lerps to destination
+        lr.gameObject.SetActive(true);
+        StartCoroutine(MoveToPosition(destination.transform.position, time));
+        // sets parent to destination
+        transform.parent = destination.transform;
+    }
+
+    IEnumerator MoveToPosition(Vector3 target, float timeToMove)
+    {
+        // sets up trail
+        lr.SetPosition(1, target);
+        Vector3 currentPos = transform.position;
+        float t = 0f;
+        while (t < 1)
+        {
+            lr.SetPosition(0, transform.position);
+            t += Time.deltaTime / timeToMove;
+            transform.position = Vector3.Lerp(currentPos, target, t);
+            yield return null;
+        }
+        transform.position = target;
+        lr.gameObject.SetActive(false);
+    }
+
+    public void MoveUp()
+    {
+        StartCoroutine(MoveToPosition(transform.position + transform.up, 1 / TickManager.tickSpeed));
     }
 }

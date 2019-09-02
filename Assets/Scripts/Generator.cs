@@ -2,14 +2,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Generator : MonoBehaviour
+public class Generator : Operator
 {
     public static Generator instance;
 
+    Animator anim;
     public GameObject nodePrefab;
-    bool generate;
-    string value;
+    // line for dispensing nodes
+    List<Node> queue;
+    // if a node is currently traversing through
     public bool processing;
+    // if the line is moving
+    bool consuming;
 
     private void Awake()
     {
@@ -18,36 +22,44 @@ public class Generator : MonoBehaviour
 
     private void Start()
     {
+        queue = new List<Node>();
+        anim = GetComponent<Animator>();
+        anim.speed = TickManager.tickSpeed;
         processing = false;
     }
 
-    private void OnEnable()
+    private void Update()
     {
-        TickManager.OnTick += OnTick;
+        if(Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            string glyphs = "abcdefghijklmnopqrstuvwxyz0123456789";
+            int charAmount = Random.Range(1, 5);
+            string myString = "";
+            for (int i = 0; i < charAmount; i++)
+            {
+                myString += glyphs[Random.Range(0, glyphs.Length)];
+            }
+            GenerateNode(myString);
+        }
     }
 
-    private void OnDisable()
+    public override void OnTick()
     {
-        TickManager.OnTick -= OnTick;
-    }
+        // spins wheel
+        anim.SetTrigger("generate");
 
-    void OnTick()
-    {
         // if requested and currently not processing and not rehashing
-        if (generate && !processing && !Rehash.instance.rehashing)
+        if (queue.Count > 0 && !processing && !Rehash.instance.rehashing)
         {
             BuildManager.instance.numNodes++;
             // if should continue
             if (BuildManager.instance.CheckLoadFactor())
             {
                 processing = true;
-                generate = false;
                 // creates the node
-                Node node = Instantiate(nodePrefab).GetComponent<Node>();
-                // sets the position, velocity, and value of node
-                node.transform.position = transform.position;
+                Node node = Consume();
+                // pushes the node
                 node.SetDirection(transform.right);
-                node.SetValue(value);
             }
             else
             {
@@ -56,10 +68,35 @@ public class Generator : MonoBehaviour
         }
     }
 
-    // generates a node at the next tick
+    // assume that there is something to consume
+    Node Consume()
+    {
+        consuming = true;
+        Invoke("EndConsume", 1 / TickManager.tickSpeed);
+        foreach(Node n in queue)
+        {
+            n.MoveUp();
+        }
+        Node node = queue[0];
+        queue.RemoveAt(0);
+        return node;
+    }
+
+    void EndConsume()
+    {
+        consuming = false;
+    }
+
+    // generates a node
     public void GenerateNode(string val)
     {
-        generate = true;
-        value = val;
+        if(!consuming)
+        {
+            // gets the position to spawn the node
+            Vector2 pos = (Vector2)(queue.Count == 0 ? transform.position : queue[queue.Count - 1].transform.position) + Vector2.down;
+            Node n = Instantiate(nodePrefab, pos, Quaternion.identity).GetComponent<Node>();
+            n.SetValue(val);
+            queue.Add(n);
+        }
     }
 }

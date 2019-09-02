@@ -15,6 +15,11 @@ public class BuildManager : MonoBehaviour
     public List<Bucket> buckets;
     Vector2 bucketCursor;
 
+    // how many buckets in each column
+    int maxHeight = 10;
+    // the width of each bucket
+    int bucketWidth = ChainBucket.maxCapacity + 2;
+
     private void Awake()
     {
         instance = this;
@@ -33,21 +38,36 @@ public class BuildManager : MonoBehaviour
         return numNodes * 1.0f / numBuckets;
     }
 
+    // return true if should continue
     public bool CheckLoadFactor()
     {
         if(GetLoadAmount() >= loadFactor)
         {
-            Rehash.instance.rehashing = true;
-            // sends all nodes to be rehashed
-            foreach(Bucket bucket in buckets)
-            {
-                bucket.RehashNodes();
-            }
-            // adds more buckets
-            AddBuckets(numBuckets + 1);
+            RehashBuckets();
             return false;
         }
         return true;
+    }
+
+    public void RehashBuckets()
+    {
+        Rehash.instance.RehashInterrupt();
+        // sends all nodes to be rehashed
+        foreach (Bucket bucket in buckets)
+        {
+            bucket.RehashNodes();
+        }
+        // trigger rehasher to start dispensing
+        Invoke("InvokeRehash", 1 / TickManager.tickSpeed * .5f);
+        // adds more buckets
+        AddBuckets(numBuckets / 2 + 1);
+        // orders the buckets nicely
+        ReorderBuckets();
+    }
+
+    void InvokeRehash()
+    {
+        Rehash.instance.rehashing = true;
     }
 
     public void AddBuckets(int num)
@@ -59,6 +79,24 @@ public class BuildManager : MonoBehaviour
             bucketCursor += Vector2.down;
             bucket.SetBucketIndex(buckets.Count);
             buckets.Add(bucket.gameObject.GetComponent<Bucket>());
+        }
+    }
+
+    void ReorderBuckets()
+    {
+        bucketCursor = bucketAnchor.transform.position;
+        int sqrt = Mathf.CeilToInt(Mathf.Sqrt(buckets.Count));
+        int height = Mathf.Min(sqrt, maxHeight);
+        for(int j = 0; j < buckets.Count; j++)
+        {
+            buckets[j].transform.position = bucketCursor;
+            // moves cursor down
+            bucketCursor += new Vector2(0, -1);
+            // if hit max height, move to the right
+            if(bucketAnchor.transform.position.y - bucketCursor.y >= height)
+            {
+                bucketCursor = new Vector2(bucketCursor.x + bucketWidth, bucketAnchor.transform.position.y);
+            }
         }
     }
 }

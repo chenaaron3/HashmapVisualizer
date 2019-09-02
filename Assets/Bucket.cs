@@ -9,4 +9,9 @@ public class Bucket : Operator
     public virtual void RehashNodes()
     {
     }
+
+    public virtual bool CheckOverflow()
+    {
+        return false;
+    }
 }

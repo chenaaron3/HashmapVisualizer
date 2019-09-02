@@ -13,10 +13,7 @@ public class Teleport : Operator
             // teleports the node to the right hash
             int bucketIndex = node.GetHash();
             Bucket targetBucket = BuildManager.instance.buckets[bucketIndex];
-            node.transform.parent = targetBucket.nodesBucket.transform;
-            node.transform.position = targetBucket.transform.position;
-            targetBucket.node = node;
-            targetBucket.OnTick();       
+            node.Teleport(targetBucket.nodesBucket);
         }
     }
 }
