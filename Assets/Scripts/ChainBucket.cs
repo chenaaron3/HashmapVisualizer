@@ -7,10 +7,6 @@ public class ChainBucket : Bucket
 {
     public static int maxCapacity = 5;
 
-    public Animator pushAnim;
-    public Operator bracket;
-    public Text bucketIndex;
-
     private void Start()
     {
         pushAnim.speed = TickManager.tickSpeed;

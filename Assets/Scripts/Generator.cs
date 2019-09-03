@@ -75,7 +75,7 @@ public class Generator : Operator
         Invoke("EndConsume", 1 / TickManager.tickSpeed);
         foreach(Node n in queue)
         {
-            n.MoveUp();
+            n.MoveDirection(Vector2.up);
         }
         Node node = queue[0];
         queue.RemoveAt(0);
@@ -94,8 +94,23 @@ public class Generator : Operator
         {
             // gets the position to spawn the node
             Vector2 pos = (Vector2)(queue.Count == 0 ? transform.position : queue[queue.Count - 1].transform.position) + Vector2.down;
-            Node n = Instantiate(nodePrefab, pos, Quaternion.identity).GetComponent<Node>();
+            Node n = Instantiate(nodePrefab, pos, Quaternion.identity, transform).GetComponent<Node>();
+            n.fromGenerator = true;
             n.SetValue(val);
+            queue.Add(n);
+        }
+    }
+
+    public void GenerateDeleterNode(string val)
+    {
+        if (!consuming)
+        {
+            // gets the position to spawn the node
+            Vector2 pos = (Vector2)(queue.Count == 0 ? transform.position : queue[queue.Count - 1].transform.position) + Vector2.down;
+            Node n = Instantiate(nodePrefab, pos, Quaternion.identity, transform).GetComponent<Node>();
+            n.fromGenerator = true;
+            n.SetValue(val);
+            n.TransformDeleter();
             queue.Add(n);
         }
     }

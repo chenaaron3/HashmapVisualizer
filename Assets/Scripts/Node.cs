@@ -12,8 +12,10 @@ public class Node : Operator
     public Text hashText;
     string value;
     int hash;
-
     Animator anim;
+
+    public bool fromGenerator;
+    public bool deleter;
 
     private void Start()
     {
@@ -30,11 +32,16 @@ public class Node : Operator
             // if encounter same node while chaining
             if(value.Equals(node.GetValue()) && rb.velocity.magnitude > 0)
             {
+                // send delete request
+                if(deleter)
+                {
+                    GetComponentInParent<Bucket>().RemoveNode(node.gameObject);
+                }
                 // remove node
-                BuildManager.instance.numNodes--;
                 Destroy(gameObject);
                 // complete process
                 Generator.instance.processing = false;
+                ViewManager.instance.ResetCamera();
             }
         }
     }
@@ -109,8 +116,20 @@ public class Node : Operator
         lr.gameObject.SetActive(false);
     }
 
-    public void MoveUp()
+    public void MoveDirection(Vector3 direction)
     {
-        StartCoroutine(MoveToPosition(transform.position + transform.up, 1 / TickManager.tickSpeed));
+        StartCoroutine(MoveToPosition(transform.position + direction, 1 / TickManager.tickSpeed));
+    }
+
+    // update numNodes
+    private void OnDestroy()
+    {
+        BuildManager.instance.numNodes--;
+    }
+
+    public void TransformDeleter()
+    {
+        deleter = true;
+        transform.Find("Graphics").GetComponent<SpriteRenderer>().color = Color.red;
     }
 }

@@ -14,6 +14,11 @@ public class Teleport : Operator
             int bucketIndex = node.GetHash();
             Bucket targetBucket = BuildManager.instance.buckets[bucketIndex];
             node.Teleport(targetBucket.nodesBucket);
+            // follow node if it is from generator
+            if (node.fromGenerator)
+            {
+                ViewManager.instance.LerpCam(targetBucket.transform.position + new Vector3(0, 0, -10));
+            }
         }
     }
 }
