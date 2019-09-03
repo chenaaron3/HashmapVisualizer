@@ -1,13 +1,44 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class BuildManager : MonoBehaviour
 {
     public static BuildManager instance;
 
-    public int numBuckets;
-    public int numNodes;
+    public Text bucketText;
+    public Text nodeText;
+    public Slider loadSlider;
+
+    int numBuckets;
+    public int NumBuckets
+    {
+        get
+        {
+            return numBuckets;
+        }
+        set
+        {
+            numBuckets = value;
+            bucketText.text = "Buckets: " + numBuckets;
+            loadSlider.value = (numNodes * 1.0f / numBuckets) / loadFactor;
+        }
+    }
+    int numNodes;
+    public int NumNodes
+    {
+        get
+        {
+            return numNodes;
+        }
+        set
+        {
+            numNodes = value;
+            nodeText.text = "Nodes: " + numNodes;
+            loadSlider.value = (numNodes * 1.0f / numBuckets) / loadFactor;
+        }
+    }
     public float loadFactor;
 
     public GameObject bucketAnchor;
@@ -30,7 +61,7 @@ public class BuildManager : MonoBehaviour
         buckets = new List<Bucket>();
         bucketCursor = bucketAnchor.transform.position;
         AddBuckets(1);
-        numNodes = 0;
+        NumNodes = 0;
     }
 
     public float GetLoadAmount()
@@ -72,7 +103,7 @@ public class BuildManager : MonoBehaviour
 
     public void AddBuckets(int num)
     {
-        numBuckets += num;
+        NumBuckets += num;
         for(int j = 0; j < num; j ++)
         {
             ChainBucket bucket = Instantiate(bucketPrefab, bucketCursor, Quaternion.identity).GetComponent<ChainBucket>();

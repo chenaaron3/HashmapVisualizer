@@ -51,7 +51,7 @@ public class Generator : Operator
         // if requested and currently not processing and not rehashing
         if (queue.Count > 0 && !processing && !Rehash.instance.rehashing)
         {
-            BuildManager.instance.numNodes++;
+            BuildManager.instance.NumNodes++;
             // if should continue
             if (BuildManager.instance.CheckLoadFactor())
             {
@@ -63,7 +63,7 @@ public class Generator : Operator
             }
             else
             {
-                BuildManager.instance.numNodes--;
+                BuildManager.instance.NumNodes--;
             }
         }
     }

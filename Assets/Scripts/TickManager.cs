@@ -16,11 +16,15 @@ public class TickManager : MonoBehaviour
     float maxSpeed = 8;
     float startSpeed = 2;
 
+    private void Awake()
+    {
+        tickSpeed = startSpeed;
+        speedLabel.text = tickSpeed + "";
+    }
+
     private void Start()
     {
         StartCoroutine(StartTickRoutine());
-        tickSpeed = startSpeed;
-        speedLabel.text = tickSpeed + "";
     }
 
     // starts ticking a frame later

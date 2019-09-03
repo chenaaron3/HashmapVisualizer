@@ -20,7 +20,7 @@ public class Modulo : Operator
         if (node != null)
         {
             // gets the number of buckets
-            int numBuckets = BuildManager.instance.numBuckets;
+            int numBuckets = BuildManager.instance.NumBuckets;
             // finds the positive modulus value
             int val = node.GetHash() % numBuckets;
             val = val < 0 ? val + numBuckets : val;

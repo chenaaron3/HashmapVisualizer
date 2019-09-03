@@ -124,7 +124,7 @@ public class Node : Operator
     // update numNodes
     private void OnDestroy()
     {
-        BuildManager.instance.numNodes--;
+        BuildManager.instance.NumNodes--;
     }
 
     public void TransformDeleter()

@@ -335,6 +335,8 @@ MonoBehaviour:
   hashtag: {fileID: 1193865140}
   valueText: {fileID: 3986249457474902187}
   hashText: {fileID: 1226802434}
+  fromGenerator: 0
+  deleter: 0
 --- !u!50 &3986249455853552523
 Rigidbody2D:
   serializedVersion: 4
