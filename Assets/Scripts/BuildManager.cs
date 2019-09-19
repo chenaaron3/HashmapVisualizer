@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class BuildManager : MonoBehaviour
 {
@@ -42,14 +43,15 @@ public class BuildManager : MonoBehaviour
     public float loadFactor;
 
     public GameObject bucketAnchor;
-    public GameObject bucketPrefab;
+    public GameObject[] bucketPrefabs;
     public List<Bucket> buckets;
+    public int activeBucket;
     Vector2 bucketCursor;
 
     // how many buckets in each column
     int maxHeight = 10;
     // the width of each bucket
-    int bucketWidth = ChainBucket.maxCapacity + 2;
+    int bucketWidth;
 
     private void Awake()
     {
@@ -59,9 +61,15 @@ public class BuildManager : MonoBehaviour
     private void Start()
     {
         buckets = new List<Bucket>();
-        bucketCursor = bucketAnchor.transform.position;
-        AddBuckets(1);
+        bucketCursor = bucketAnchor.transform.position;    
         NumNodes = 0;
+        AddBuckets(1);
+    }
+
+    IEnumerator CreateBucket()
+    {
+        yield return new WaitForEndOfFrame();
+        AddBuckets(1);
     }
 
     public float GetLoadAmount()
@@ -101,18 +109,20 @@ public class BuildManager : MonoBehaviour
         Rehash.instance.rehashing = true;
     }
 
+    // creates and tracks the bucket
     public void AddBuckets(int num)
     {
         NumBuckets += num;
         for(int j = 0; j < num; j ++)
         {
-            ChainBucket bucket = Instantiate(bucketPrefab, bucketCursor, Quaternion.identity).GetComponent<ChainBucket>();
+            Bucket bucket = Instantiate(bucketPrefabs[activeBucket], bucketCursor, Quaternion.identity).GetComponent<Bucket>();
             bucketCursor += Vector2.down;
             bucket.SetBucketIndex(buckets.Count);
-            buckets.Add(bucket.gameObject.GetComponent<Bucket>());
+            buckets.Add(bucket);
         }
     }
 
+    // reorders the buckets based on given width and height
     void ReorderBuckets()
     {
         bucketCursor = bucketAnchor.transform.position;
@@ -124,10 +134,52 @@ public class BuildManager : MonoBehaviour
             // moves cursor down
             bucketCursor += new Vector2(0, -1);
             // if hit max height, move to the right
+            int width = 2;
+            width += activeBucket == 0 ? ChainBucket.maxCapacity : ProbeBucket.maxCapacity;
             if(bucketAnchor.transform.position.y - bucketCursor.y >= height)
             {
-                bucketCursor = new Vector2(bucketCursor.x + bucketWidth, bucketAnchor.transform.position.y);
+                bucketCursor = new Vector2(bucketCursor.x + width, bucketAnchor.transform.position.y);
             }
         }
+    }
+
+    public void ChangeCollisionMethod(int index)
+    {
+        activeBucket = index;
+        Restart();
+        //Mode.instance.mode = index;
+        //SceneManager.LoadScene(0);
+    }
+
+    public Bucket GetNextBucket(int index)
+    {
+        // if last bucket, return the first bucket
+        if(index == buckets.Count - 1)
+        {
+            return buckets[0];
+        }
+        return buckets[index + 1];
+    }
+
+    public void Restart()
+    {
+        Generator.instance.Reset();
+        Rehash.instance.Reset();
+        NumNodes += Generator.instance.queue.Count;
+        // destroys all the nodes
+        foreach (Node n in FindObjectsOfType<Node>())
+        {
+            Destroy(n.gameObject);
+        }
+        // destroys all the buckets
+        while (buckets.Count > 0)
+        {
+            Destroy(buckets[0].gameObject);
+            buckets.RemoveAt(0);
+        }
+        // resets setup
+        bucketCursor = bucketAnchor.transform.position;
+        NumBuckets = 0;
+        AddBuckets(1);
     }
 }

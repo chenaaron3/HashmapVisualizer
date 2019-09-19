@@ -9,7 +9,7 @@ public class Generator : Operator
     Animator anim;
     public GameObject nodePrefab;
     // line for dispensing nodes
-    List<Node> queue;
+    public List<Node> queue;
     // if a node is currently traversing through
     public bool processing;
     // if the line is moving
@@ -28,19 +28,16 @@ public class Generator : Operator
         processing = false;
     }
 
-    private void Update()
+    public void GenerateRandom()
     {
-        if(Input.GetKeyDown(KeyCode.Alpha1))
+        string glyphs = "abcdefghijklmnopqrstuvwxyz0123456789";
+        int charAmount = Random.Range(1, 5);
+        string myString = "";
+        for (int i = 0; i < charAmount; i++)
         {
-            string glyphs = "abcdefghijklmnopqrstuvwxyz0123456789";
-            int charAmount = Random.Range(1, 5);
-            string myString = "";
-            for (int i = 0; i < charAmount; i++)
-            {
-                myString += glyphs[Random.Range(0, glyphs.Length)];
-            }
-            GenerateNode(myString);
+            myString += glyphs[Random.Range(0, glyphs.Length)];
         }
+        GenerateNode(myString);
     }
 
     public override void OnTick()
@@ -55,6 +52,7 @@ public class Generator : Operator
             // if should continue
             if (BuildManager.instance.CheckLoadFactor())
             {
+                // starts processing the node
                 processing = true;
                 // creates the node
                 Node node = Consume();
@@ -63,6 +61,7 @@ public class Generator : Operator
             }
             else
             {
+                // node did not get generated
                 BuildManager.instance.NumNodes--;
             }
         }
@@ -73,15 +72,18 @@ public class Generator : Operator
     {
         consuming = true;
         Invoke("EndConsume", 1 / TickManager.tickSpeed);
+        // moves every node up
         foreach(Node n in queue)
         {
             n.MoveDirection(Vector2.up);
         }
+        // retreives the first node
         Node node = queue[0];
         queue.RemoveAt(0);
         return node;
     }
 
+    // stops triggers the end of consumption
     void EndConsume()
     {
         consuming = false;
@@ -90,6 +92,10 @@ public class Generator : Operator
     // generates a node
     public void GenerateNode(string val)
     {
+        if(val.Equals(""))
+        {
+            return;
+        }
         if(!consuming)
         {
             // gets the position to spawn the node
@@ -101,6 +107,7 @@ public class Generator : Operator
         }
     }
 
+    // generates a node and converts it into a deleter
     public void GenerateDeleterNode(string val)
     {
         if (!consuming)
@@ -113,5 +120,12 @@ public class Generator : Operator
             n.TransformDeleter();
             queue.Add(n);
         }
+    }
+
+    // clears line and ends processing
+    public void Reset()
+    {
+        queue.Clear();
+        processing = false;
     }
 }

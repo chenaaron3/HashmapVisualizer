@@ -22,6 +22,7 @@ public class TickManager : MonoBehaviour
         speedLabel.text = tickSpeed + "";
     }
 
+    // starts ticking after the first frame
     private void Start()
     {
         StartCoroutine(StartTickRoutine());
@@ -34,6 +35,7 @@ public class TickManager : MonoBehaviour
         StartCoroutine(TickRoutine());
     }
 
+    // cycle for ticks
     IEnumerator TickRoutine()
     {
         // everything revolves around the tick event
@@ -43,6 +45,7 @@ public class TickManager : MonoBehaviour
         StartCoroutine(TickRoutine());
     }
 
+    // speeds up tick rate
     public void SpeedUp()
     {
         tickSpeed *= 2;
@@ -53,6 +56,7 @@ public class TickManager : MonoBehaviour
         speedLabel.text = tickSpeed + "";
     }
 
+    // slows down tick rate
     public void SlowDown()
     {
         tickSpeed /= 2;

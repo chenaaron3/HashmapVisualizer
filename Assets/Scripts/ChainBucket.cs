@@ -1,15 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class ChainBucket : Bucket
 {
-    public static int maxCapacity = 5;
+    public static int maxCapacity;
 
     private void Start()
     {
         pushAnim.speed = TickManager.tickSpeed;
+        maxCapacity = 5;
     }
 
     public override void OnTick()
@@ -33,11 +33,6 @@ public class ChainBucket : Bucket
             return false;
         }
         return true;
-    }
-
-    public void SetBucketIndex(int index)
-    {
-        bucketIndex.text = index + "";
     }
 
     public override void RehashNodes()

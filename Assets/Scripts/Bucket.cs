@@ -8,6 +8,7 @@ public class Bucket : Operator
     public GameObject nodesBucket;
     public Animator pushAnim;
     public Operator bracket;
+    protected int index;
     public Text bucketIndex;
 
     public virtual void RehashNodes()
@@ -36,5 +37,12 @@ public class Bucket : Operator
         }
         // moves bracket
         bracket.transform.position += Vector3.left;
+    }
+
+    // sets the bucket's ui index
+    public void SetBucketIndex(int index)
+    {
+        this.index = index;
+        bucketIndex.text = index + "";
     }
 }

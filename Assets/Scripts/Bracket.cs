@@ -14,17 +14,20 @@ public class Bracket : Operator
     // request to add to bucket
     public override void OnTick()
     {
+        // if node reached the end of bucket
         if (node != null)
         {
+            // if is a deleter node
             if(node.deleter)
             {
+                // destroy the deleter node
                 Destroy(node.gameObject);
                 Generator.instance.processing = false;
                 ViewManager.instance.ResetCamera();
             }
             else
             {
-                // checks overflow
+                // if bucket is not overflowing
                 if (myBucket.CheckOverflow())
                 {
                     // stops the node

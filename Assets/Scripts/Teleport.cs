@@ -8,6 +8,11 @@ public class Teleport : Operator
     {
         if (node != null)
         {
+            // if probing, enable the flags
+            if(BuildManager.instance.activeBucket == 1)
+            {
+                node.SetProbeAcceptModes(2);
+            }
             // consumes the hashtag
             node.HideHashtag();
             // teleports the node to the right hash

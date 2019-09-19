@@ -67,9 +67,17 @@ public class Rehash : MonoBehaviour
         }
     }
 
+    // prepares a node to be rehashed
     public void RehashNode(Node node)
     {
         node.Teleport(spawn);
         queue.Add(node);
+    }
+
+    // cleares line and ends rehashing
+    public void Reset()
+    {
+        queue.Clear();
+        rehashing = false;
     }
 }

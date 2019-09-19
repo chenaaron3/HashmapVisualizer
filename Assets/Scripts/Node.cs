@@ -8,8 +8,11 @@ public class Node : Operator
     public LineRenderer lr;
     public Rigidbody2D rb;
     public GameObject hashtag;
+    public GameObject greenTag;
+    public GameObject yellowTag;
     public Text valueText;
     public Text hashText;
+    public List<ProbeBucket.ProbeMode> probeFlags;
     string value;
     int hash;
     Animator anim;
@@ -32,8 +35,9 @@ public class Node : Operator
             // if encounter same node while chaining
             if(value.Equals(node.GetValue()) && rb.velocity.magnitude > 0)
             {
-                // send delete request
-                if(deleter)
+                Debug.Log("Node Duplicate!!");
+                // send delete request to bucket
+                if (deleter)
                 {
                     GetComponentInParent<Bucket>().RemoveNode(node.gameObject);
                 }
@@ -99,6 +103,7 @@ public class Node : Operator
         transform.parent = destination.transform;
     }
 
+    // moves to a position in a given time
     IEnumerator MoveToPosition(Vector3 target, float timeToMove)
     {
         // sets up trail
@@ -116,6 +121,7 @@ public class Node : Operator
         lr.gameObject.SetActive(false);
     }
 
+    // moves one step in a given direction
     public void MoveDirection(Vector3 direction)
     {
         StartCoroutine(MoveToPosition(transform.position + direction, 1 / TickManager.tickSpeed));
@@ -127,9 +133,64 @@ public class Node : Operator
         BuildManager.instance.NumNodes--;
     }
 
+    // transforms an adder node into a deleter node
     public void TransformDeleter()
     {
         deleter = true;
         transform.Find("Graphics").GetComponent<SpriteRenderer>().color = Color.red;
+    }
+
+    // displays the indicators for probe modes
+    public void SetProbeAcceptModes(int numModes)
+    {
+        // from teleport
+        if (numModes == 2)
+        {
+            if(deleter)
+            {
+                AcceptOne();
+            }
+            else
+            {
+                AcceptBoth();
+            }
+        }
+        // from probing
+        if(numModes == 1)
+        {
+            AcceptOne();
+        }
+        // from reaching match
+        if (numModes == 0)
+        {
+            AcceptNone();
+        }
+    }
+
+    void AcceptBoth()
+    {
+        probeFlags.Clear();
+        probeFlags.Add(ProbeBucket.ProbeMode.NEW);
+        probeFlags.Add(ProbeBucket.ProbeMode.USED);
+        greenTag.transform.localPosition = new Vector3(-.25f, .56f);
+        yellowTag.transform.localPosition = new Vector3(.25f, .56f);
+        greenTag.SetActive(true);
+        yellowTag.SetActive(true);
+    }
+
+    void AcceptOne()
+    {
+        probeFlags.Clear();
+        probeFlags.Add(ProbeBucket.ProbeMode.NEW);
+        transform.Find("Green").localPosition = new Vector3(0, .56f);
+        greenTag.SetActive(true);
+        yellowTag.SetActive(false);
+    }
+
+    void AcceptNone()
+    {
+        probeFlags.Clear();
+        greenTag.SetActive(false);
+        yellowTag.SetActive(false);
     }
 }
